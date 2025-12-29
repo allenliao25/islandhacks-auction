@@ -1,0 +1,58 @@
+@import "tailwindcss";
+
+/* Playful heading font */
+.font-display {
+  font-family: 'Sora', sans-serif;
+}
+
+/* Base resets */
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Prevent grid item overflow */
+.grid > * {
+  min-width: 0;
+}
+
+/* Ensure all interactive elements have pointer cursor */
+button,
+[role="button"],
+a[href],
+input[type="submit"],
+input[type="button"],
+select {
+  cursor: pointer;
+}
+
+/* Disabled buttons should show not-allowed cursor */
+button:disabled,
+input:disabled {
+  cursor: not-allowed;
+}
+
+/* Slower ping animation for live indicator */
+@keyframes ping-slow {
+  75%, 100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.animate-ping-slow {
+  animation: ping-slow 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
