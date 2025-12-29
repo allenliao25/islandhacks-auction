@@ -24,51 +24,58 @@ const AUCTION_ITEMS = [
   {
     id: 1,
     title: "ASUS TUF Gaming GeForce RTX™ 4090 24GB OG",
-    price: 1297,
+    price: 1000,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?auto=format&fit=crop&q=80&w=800"
+    img: "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?auto=format&fit=crop&q=80&w=800",
+    bidIncrements: [25, 50, 75, 100]
   },
   {
     id: 2,
     title: "PNY GeForce RTX™ 4090 24GB VERTO™ Triple Fan",
-    price: 1297,
+    price: 1000,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&q=80&w=800"
+    img: "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&q=80&w=800",
+    bidIncrements: [25, 50, 75, 100]
   },
   {
     id: 3,
     title: "ASUS ROG Ally X (2024) Handheld",
-    price: 497,
+    price: 400,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?auto=format&fit=crop&q=80&w=800"
+    img: "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?auto=format&fit=crop&q=80&w=800",
+    bidIncrements: [10, 25, 50, 75]
   },
   {
     id: 4,
     title: "CORSAIR VENGEANCE RGB DDR5 64GB (6000MHz)",
-    price: 297,
+    price: 300,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?auto=format&fit=crop&q=80&w=800"
+    img: "https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?auto=format&fit=crop&q=80&w=800",
+    bidIncrements: [10, 20, 35, 50]
   },
   {
     id: 5,
     title: "Limited Edition Hackathon Hoodie",
-    price: 97,
+    price: 100,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=800"
+    img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=800",
+    bidIncrements: [5, 10, 20, 50]
   },
   {
     id: 6,
     title: "Mystery Tech Box (Value $500+)",
-    price: 197,
+    price: 150,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&q=80&w=800"
+    img: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&q=80&w=800",
+    bidIncrements: [5, 15, 25, 50]
   },
   {
     id: 7,
     title: "The Ultimate iFixit Repair Business Toolkit",
-    price: 197,
+    price: 150,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&q=80&w=800"
+    img: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&q=80&w=800",
+    bidIncrements: [10, 20, 35, 50]
   }
 ];
 
@@ -221,13 +228,13 @@ const CompactCountdown = () => {
   const time = formatTime(timeLeft);
 
   return (
-    <div className="flex items-center gap-1 font-mono text-lg md:text-xl font-bold text-slate-800 bg-white/60 backdrop-blur-sm px-3 py-1.5 rounded-lg border border-white/60">
-      {time.days > 0 && <><span>{time.days}d</span><span className="text-slate-300 mx-0.5">:</span></>}
-      <span>{time.hours}h</span>
-      <span className="text-slate-300 mx-0.5">:</span>
-      <span>{time.mins}m</span>
-      <span className="text-slate-300 mx-0.5">:</span>
-      <span>{time.secs}s</span>
+    <div className="flex items-center gap-3 text-4xl md:text-5xl font-black text-slate-800 bg-white/70 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/60 shadow-md">
+      {time.days > 0 && <><span className="tabular-nums">{time.days}d</span><span className="text-slate-300 mx-1">:</span></>}
+      <span className="tabular-nums">{time.hours}h</span>
+      <span className="text-slate-300 mx-1">:</span>
+      <span className="tabular-nums">{time.mins}m</span>
+      <span className="text-slate-300 mx-1">:</span>
+      <span className="tabular-nums">{time.secs}s</span>
     </div>
   );
 };
@@ -578,7 +585,7 @@ const GlassCard = ({ children, className = "", delay = 0, tilt = false }) => (
   </motion.div>
 );
 
-const AuctionItem = ({ title, price, img, bidder }) => {
+const AuctionItem = ({ title, price, img, bidder, bidIncrements = [5, 10, 20, 50] }) => {
   const [currentPrice, setCurrentPrice] = useState(parseInt(price));
   const [currentBidder, setCurrentBidder] = useState(bidder);
   const [isBidding, setIsBidding] = useState(false);
@@ -677,7 +684,7 @@ const AuctionItem = ({ title, price, img, bidder }) => {
               <p className="text-slate-500 text-sm mb-6">Current: <span className="font-bold text-orange-500">${currentPrice}</span></p>
               
               <div className="grid grid-cols-2 gap-3 w-full mb-4">
-                  {[5, 10, 20, 50].map(inc => (
+                  {bidIncrements.map(inc => (
                       <button 
                         key={inc} 
                         onClick={() => initiateBid(inc)} 
@@ -836,7 +843,7 @@ export default function App() {
             transition={{ delay: 0.2 }}
             className="text-base md:text-lg text-slate-600 mb-4 max-w-xl mx-auto"
           >
-            100% of proceeds fund future hackathons and scholarships for local Alameda students.
+            100% of proceeds fund future hackathons and scholarships<br/>for local Alameda students.
           </motion.p>
           
           {/* Compact timer */}
@@ -846,8 +853,8 @@ export default function App() {
             transition={{ delay: 0.3 }}
             className="flex flex-col items-center"
           >
-            <span className="text-[10px] font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1 mb-1">
-              <Clock size={12} /> Ends In
+            <span className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1.5 mb-2">
+              <Clock size={14} /> Ends In
             </span>
             <CompactCountdown />
           </motion.div>
@@ -859,7 +866,7 @@ export default function App() {
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
             <h2 className="text-2xl md:text-3xl font-bold text-slate-800 font-display flex items-center gap-2">
-              Up for Grabs <span className="text-xl">🎁</span>
+              Auction Items <span className="text-xl">🎁</span>
             </h2>
             <motion.div 
               initial={{ rotate: 0 }}
@@ -880,6 +887,7 @@ export default function App() {
                 price={item.price} 
                 bidder={item.bidder}
                 img={item.img}
+                bidIncrements={item.bidIncrements}
               />
             ))}
           </div>
@@ -937,7 +945,6 @@ export default function App() {
                   initial={{ opacity: 0, y: 40, rotate: -2 }}
                   whileInView={{ opacity: 1, y: 0, rotate: -2 }}
                   whileHover={{ rotate: 0 }}
-                  transition={{ delay: 0.2 }}
                   className="space-y-4 pt-8"
                 >
                    <img 
@@ -956,24 +963,30 @@ export default function App() {
                   </motion.div>
                 </motion.div>
                 
-                <motion.div
-                  initial={{ opacity: 0, y: 40, rotate: 3 }}
-                  whileInView={{ opacity: 1, y: 0, rotate: 3 }}
-                  whileHover={{ rotate: 0 }}
-                  transition={{ delay: 0.4 }}
-                  className="space-y-4"
-                >
-                  <img 
-                    src="/mentoring.jpg" 
-                    className="rounded-3xl object-cover h-48 w-full border-4 border-white shadow-xl"
-                    alt="Mentor helping students code"
-                  />
-                   <img 
-                    src="/hacking-room.jpg" 
-                    className="rounded-xl object-cover h-40 w-full border-4 border-white shadow-xl"
-                    alt="Room full of students hacking"
-                  />
-                </motion.div>
+                <div className="space-y-4">
+                  <motion.div
+                    initial={{ opacity: 0, y: 40, rotate: 3 }}
+                    whileInView={{ opacity: 1, y: 0, rotate: 3 }}
+                    whileHover={{ rotate: 0, scale: 1.02 }}
+                  >
+                    <img 
+                      src="/mentoring.jpg" 
+                      className="rounded-3xl object-cover h-48 w-full border-4 border-white shadow-xl"
+                      alt="Mentor helping students code"
+                    />
+                  </motion.div>
+                  <motion.div
+                    initial={{ opacity: 0, y: 30, rotate: -2 }}
+                    whileInView={{ opacity: 1, y: 0, rotate: -2 }}
+                    whileHover={{ rotate: 1, scale: 1.02 }}
+                  >
+                    <img 
+                      src="/hacking-room.jpg" 
+                      className="rounded-xl object-cover object-left h-40 w-full border-4 border-white shadow-xl"
+                      alt="Room full of students hacking"
+                    />
+                  </motion.div>
+                </div>
                 
                 {/* Big group photo spanning full width */}
                 <motion.div
@@ -998,13 +1011,13 @@ export default function App() {
       {/* --- DONATION / FOOTER --- */}
       <section id="donate" className="py-20 px-6 relative z-10 pb-32">
         <div className="max-w-3xl mx-auto text-center">
-          <GlassCard className="border-t-4 border-t-sky-500 bg-white/60">
+          <GlassCard className="border-t-4 border-t-pink-300 bg-white/60">
             <motion.div 
               initial={{ rotate: -5 }}
               whileHover={{ rotate: 5 }}
-              className="inline-flex p-4 rounded-xl bg-sky-500/20 mb-6 ring-2 ring-sky-200"
+              className="inline-flex p-4 rounded-xl bg-pink-400/20 mb-6 ring-2 ring-pink-200"
             >
-              <Heart size={40} className="text-sky-500 fill-sky-500/20" />
+              <Heart size={40} className="text-pink-400 fill-pink-400/30" />
             </motion.div>
             
             <h2 className="text-4xl font-bold mb-4 text-slate-800 font-display">Just Want to Donate?</h2>
@@ -1019,14 +1032,14 @@ export default function App() {
                 { label: '$25', value: 2500 },
                 { label: '$50', value: 5000 },
                 { label: '$100', value: 10000 },
-                { label: 'Other', value: null }
+                { label: 'Custom', value: null }
               ].map((item) => (
                 <a 
                   key={item.label} 
                   href={`https://hcb.hackclub.com/donations/start/islandhacks${item.value ? `?amount=${item.value}` : ''}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-4 rounded-2xl border-2 border-slate-200 bg-white hover:bg-sky-50 hover:border-sky-400 hover:text-sky-600 transition-all font-semibold text-lg text-slate-700 flex items-center justify-center shadow-sm"
+                  className="px-6 py-4 rounded-2xl border-2 border-slate-200 bg-white hover:bg-pink-50 hover:border-pink-300 hover:text-pink-500 transition-all font-semibold text-lg text-slate-700 flex items-center justify-center shadow-sm"
                 >
                   {item.label}
                 </a>
@@ -1037,7 +1050,7 @@ export default function App() {
               href="https://hcb.hackclub.com/donations/start/islandhacks" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-16 py-5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white rounded-2xl font-bold shadow-xl shadow-orange-500/20 transition-all flex items-center justify-center gap-3 mx-auto text-lg"
+              className="w-full sm:w-auto px-16 py-5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white rounded-2xl font-bold shadow-xl shadow-orange-500/20 transition-all hover:scale-105 flex items-center justify-center gap-3 mx-auto text-lg"
             >
               Donate Now <ArrowRight size={22} />
             </a>
