@@ -2,18 +2,53 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Heart, Laptop, Users, Gavel, ArrowRight, Sparkles, Menu, X, CreditCard, CheckCircle, AlertCircle, Loader2, Lock, Clock, Calendar, Instagram, Mail, History } from 'lucide-react';
 
-/* --- AUCTION END DATE --- 
-   Change this to set when ALL auctions end.
+/* --- AUCTION START & END DATES --- 
+   Change these to set when the auction opens and closes.
    Format: new Date('YYYY-MM-DDTHH:MM:SS')
-   Example: March 31st, 2025 at 11:59 PM PST
+   Note: Times are in PST (UTC-8)
 */
-const AUCTION_END_DATE = new Date('2026-03-31T23:59:59');
+const AUCTION_START_DATE = new Date('2026-02-14T09:00:00-08:00'); // Feb 14, 2026, 9:00 AM PST
+const AUCTION_END_DATE = new Date('2026-03-14T21:00:00-08:00');   // Mar 14, 2026, 9:00 PM PST
 
-// Helper function to calculate seconds remaining until the auction ends
-const getSecondsUntilEnd = () => {
+// Helper function to check if auction has started
+const hasAuctionStarted = () => {
+  return new Date().getTime() >= AUCTION_START_DATE.getTime();
+};
+
+// Helper function to check if auction has ended
+const hasAuctionEnded = () => {
+  return new Date().getTime() >= AUCTION_END_DATE.getTime();
+};
+
+// Helper function to calculate seconds remaining (to start or end)
+const getSecondsRemaining = () => {
   const now = new Date();
-  const diff = AUCTION_END_DATE.getTime() - now.getTime();
+  const targetDate = hasAuctionStarted() ? AUCTION_END_DATE : AUCTION_START_DATE;
+  const diff = targetDate.getTime() - now.getTime();
   return Math.max(0, Math.floor(diff / 1000));
+};
+
+// Format date as "Fri, Feb 14, 2026 · 9:00 AM PST"
+const formatAuctionDate = (date) => {
+  const options = {
+    weekday: 'short',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    timeZone: 'America/Los_Angeles'
+  };
+  const timeOptions = {
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZone: 'America/Los_Angeles',
+    timeZoneName: 'short'
+  };
+  
+  const datePart = date.toLocaleDateString('en-US', options);
+  const timePart = date.toLocaleTimeString('en-US', timeOptions);
+  
+  // Format: "Fri, Feb 14, 2026 · 9:00 AM PST"
+  return `${datePart} · ${timePart}`.replace('PDT', 'PST');
 };
 
 /* --- EDIT THIS LIST TO UPDATE YOUR LIVE ITEMS --- 
@@ -146,11 +181,11 @@ const Navbar = () => {
 
 /* --- GLOBAL EVENT COUNTDOWN --- */
 const EventCountdown = () => {
-  const [timeLeft, setTimeLeft] = useState(getSecondsUntilEnd());
+  const [timeLeft, setTimeLeft] = useState(getSecondsRemaining());
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(getSecondsUntilEnd());
+      setTimeLeft(getSecondsRemaining());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -202,11 +237,11 @@ const EventCountdown = () => {
 
 /* --- COMPACT COUNTDOWN FOR HERO --- */
 const CompactCountdown = () => {
-  const [timeLeft, setTimeLeft] = useState(getSecondsUntilEnd());
+  const [timeLeft, setTimeLeft] = useState(getSecondsRemaining());
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(getSecondsUntilEnd());
+      setTimeLeft(getSecondsRemaining());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -597,12 +632,14 @@ const AuctionItem = ({ title, price, img, bidder, bidIncrements = [5, 10, 20, 50
   const [bids, setBids] = useState([]);
   const [showHistory, setShowHistory] = useState(false);
 
-  // LIVE TIMER LOGIC - uses global AUCTION_END_DATE
-  const [timeLeft, setTimeLeft] = useState(getSecondsUntilEnd());
+  // LIVE TIMER LOGIC - uses global AUCTION dates
+  const [timeLeft, setTimeLeft] = useState(getSecondsRemaining());
+  const [auctionStarted, setAuctionStarted] = useState(hasAuctionStarted());
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeLeft(getSecondsUntilEnd());
+      setTimeLeft(getSecondsRemaining());
+      setAuctionStarted(hasAuctionStarted());
     }, 1000);
     return () => clearInterval(timer);
   }, []);
@@ -766,11 +803,23 @@ const AuctionItem = ({ title, price, img, bidder, bidIncrements = [5, 10, 20, 50
 
         </div>
         <button 
-          onClick={() => timeLeft > 0 ? setIsBidding(true) : null}
-          disabled={timeLeft <= 0}
-          className={`w-full py-3.5 mt-auto rounded-xl text-white font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 ${timeLeft > 0 ? 'bg-sky-500 hover:bg-sky-500/90 shadow-sky-400/20' : 'bg-slate-400 cursor-not-allowed'}`}
+          onClick={() => (auctionStarted && timeLeft > 0) ? setIsBidding(true) : null}
+          disabled={!auctionStarted || timeLeft <= 0}
+          className={`w-full py-3.5 mt-auto rounded-xl text-white font-bold shadow-lg transition-all flex items-center justify-center gap-2 ${
+            !auctionStarted 
+              ? 'bg-slate-400 cursor-not-allowed' 
+              : timeLeft > 0 
+                ? 'bg-sky-500 hover:bg-sky-500/90 shadow-sky-400/20 active:scale-95' 
+                : 'bg-slate-400 cursor-not-allowed'
+          }`}
         >
-          {timeLeft > 0 ? <><Gavel size={18} /> Place Bid</> : "Auction Closed"}
+          {!auctionStarted ? (
+            <><Lock size={18} /> Bidding Opens Soon</>
+          ) : timeLeft > 0 ? (
+            <><Gavel size={18} /> Place Bid</>
+          ) : (
+            "Auction Closed"
+          )}
         </button>
       </GlassCard>
     </>
@@ -837,26 +886,86 @@ export default function App() {
             <span className="text-orange-500">Auction</span>
           </motion.h1>
 
-          <motion.p 
+          <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-base md:text-lg text-slate-600 mb-4 max-w-xl mx-auto"
+            className="text-base md:text-lg text-slate-600 mb-4 max-w-xl mx-auto relative"
           >
-            100% of proceeds fund future hackathons and scholarships<br/>for local Alameda students.
-          </motion.p>
+            <p className="relative inline-block">
+              <span className="relative inline-block">
+                <span className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-orange-500 via-orange-600 to-orange-500 bg-clip-text text-transparent animate-gradient-x">
+                  100%
+                </span>
+                {/* Animated hand-drawn underline */}
+                <motion.svg 
+                  className="absolute -bottom-2 left-0 w-full h-5 pointer-events-none"
+                  viewBox="0 0 140 14"
+                  xmlns="http://www.w3.org/2000/svg"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ 
+                    duration: 0.3, 
+                    delay: 0.5,
+                  }}
+                >
+                  {/* Hand-drawn style underline with natural imperfections */}
+                  <motion.path
+                    d="M 8 7 C 12 6.5, 15 8, 20 7.5 C 25 7, 28 5.5, 33 6 C 38 6.5, 42 8, 47 7.5 C 52 7, 56 5, 61 5.5 C 66 6, 70 7.5, 75 7 C 80 6.5, 84 5.5, 89 6 C 94 6.5, 98 7.5, 103 7 C 108 6.5, 112 6, 117 6.5 C 122 7, 126 7.5, 130 7"
+                    stroke="#f97316"
+                    strokeWidth="8"
+                    fill="none"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ 
+                      duration: 0.8, 
+                      delay: 0.7,
+                      ease: "easeOut"
+                    }}
+                    style={{
+                      filter: "url(#roughen)"
+                    }}
+                  />
+                  {/* SVG filter for hand-drawn texture */}
+                  <defs>
+                    <filter id="roughen">
+                      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" result="noise" seed="2" />
+                      <feDisplacementMap in="SourceGraphic" in2="noise" scale="0.8" xChannelSelector="R" yChannelSelector="G" />
+                    </filter>
+                  </defs>
+                </motion.svg>
+              </span>
+              {" "}of proceeds fund future hackathons and scholarships<br/>for local Alameda students.
+            </p>
+            {/* Subtle glow background */}
+            <motion.div
+              className="absolute -inset-4 bg-gradient-to-r from-orange-50/0 via-orange-100/30 to-orange-50/0 rounded-2xl blur-xl"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0, 0.4, 0.3] }}
+              transition={{
+                duration: 2,
+                delay: 1.2,
+              }}
+              style={{ zIndex: -1 }}
+            />
+          </motion.div>
           
           {/* Compact timer */}
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="flex flex-col items-center"
+            className="flex flex-col items-center gap-3"
           >
-            <span className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1.5 mb-2">
-              <Clock size={14} /> Ends In
+            <span className="text-xs font-bold text-orange-500 uppercase tracking-widest flex items-center gap-1.5">
+              <Clock size={14} /> {hasAuctionStarted() ? 'Auction Ends In' : 'Auction Starts In'}
             </span>
             <CompactCountdown />
+            <span className="text-sm text-slate-600 font-medium">
+              {formatAuctionDate(hasAuctionStarted() ? AUCTION_END_DATE : AUCTION_START_DATE)}
+            </span>
           </motion.div>
         </div>
       </section>
@@ -864,9 +973,9 @@ export default function App() {
       {/* --- AUCTION SECTION --- */}
       <section id="auction" className="pt-4 pb-16 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
             <h2 className="text-2xl md:text-3xl font-bold text-slate-800 font-display flex items-center gap-2">
-              Auction Items <span className="text-xl">🎁</span>
+              Auction Items <span className="text-xl"></span>
             </h2>
             <motion.div 
               initial={{ rotate: 0 }}
@@ -876,6 +985,18 @@ export default function App() {
             >
               100% student-run 🙋
             </motion.div>
+          </div>
+          
+          {/* Auction date info */}
+          <div className="mb-6 text-center">
+            <p className="text-sm text-slate-600 font-medium flex items-center justify-center gap-2">
+              <Calendar size={16} className="text-orange-500" />
+              {hasAuctionStarted() ? (
+                <>All items close: {formatAuctionDate(AUCTION_END_DATE)}</>
+              ) : (
+                <>Bidding opens: {formatAuctionDate(AUCTION_START_DATE)}</>
+              )}
+            </p>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -906,11 +1027,11 @@ export default function App() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                 >
-                  <div className="flex items-center gap-2 text-orange-500 font-bold mb-4 uppercase tracking-widest text-sm">
+                  <div className="flex items-center gap-2 text-pink-500 font-bold mb-4 uppercase tracking-widest text-sm">
                     <Heart size={16} fill="currentColor" /> Our Impact
                   </div>
                   <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-slate-800 font-display">
-                    Where Your <br/> <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">Bid Goes</span> 💸
+                    Where Your <br/> Bid Goes 💸
                   </h2>
                   <p className="text-2xl font-bold text-slate-800 mb-4">
                     Students. Students. Students.
@@ -1054,24 +1175,9 @@ export default function App() {
             >
               Donate Now <ArrowRight size={22} />
             </a>
-            
-            {/* Donor Graph */}
-            <div className="mt-10 pt-8 border-t border-white/40">
-              <p className="text-sm text-slate-500 mb-4 text-center">Join our amazing supporters 💙</p>
-              <img 
-                src="https://graph.hcb.hackclub.com/islandhacks" 
-                alt="Donor graph for IslandHacks"
-                className="w-full max-w-lg mx-auto"
-              />
-            </div>
           </GlassCard>
           
           <footer className="mt-20 text-slate-400 text-sm flex flex-col items-center gap-6">
-            {/* Fun student-run note */}
-            <p className="text-slate-500 text-sm italic">
-              Made with 💛 by the IslandHacks team.
-            </p>
-            
             <div className="flex flex-col sm:flex-row gap-8 items-center">
               <a 
                 href="https://www.instagram.com/islandhacks/" 
