@@ -1,6 +1,53 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Heart, Laptop, Users, Gavel, ArrowRight, Sparkles, Menu, X, CreditCard, CheckCircle, AlertCircle, Loader2, Lock, Clock, Calendar, Instagram, Mail, History } from 'lucide-react';
+import { Heart, Laptop, Users, Gavel, ArrowRight, Sparkles, Menu, X, CreditCard, CheckCircle, AlertCircle, Loader2, Lock, Clock, Calendar, Instagram, Mail, History, Moon, Sun } from 'lucide-react';
+
+/* --- DARK MODE HOOK --- */
+const useDarkMode = () => {
+  // Get initial dark mode state
+  const getInitialDarkMode = () => {
+    // Check localStorage first
+    const savedMode = localStorage.getItem('darkMode');
+    if (savedMode !== null) {
+      return savedMode === 'true';
+    }
+    // Fall back to system preference
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  };
+
+  const [isDarkMode, setIsDarkMode] = useState(() => getInitialDarkMode());
+
+  useEffect(() => {
+    // Update document root class
+    const root = document.documentElement;
+    if (isDarkMode) {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    
+    // Persist to localStorage
+    localStorage.setItem('darkMode', isDarkMode.toString());
+  }, [isDarkMode]);
+
+  // Listen for system preference changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = (e) => {
+      // Only update if user hasn't set a preference
+      if (localStorage.getItem('darkMode') === null) {
+        setIsDarkMode(e.matches);
+      }
+    };
+    
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, []);
+
+  const toggleDarkMode = () => setIsDarkMode(prev => !prev);
+
+  return [isDarkMode, toggleDarkMode];
+};
 
 /* --- AUCTION START & END DATES --- 
    Change these to set when the auction opens and closes.
@@ -58,63 +105,86 @@ const formatAuctionDate = (date) => {
 const AUCTION_ITEMS = [
   {
     id: 1,
-    title: "ASUS TUF Gaming GeForce RTX™ 4090 24GB OG",
+    title: "ASUS TUF GeForce RTX 4090 24GB",
     price: 1000,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1624705002806-5d72df19c3ad?auto=format&fit=crop&q=80&w=800",
+    img: "/asus-4090.png",
     bidIncrements: [25, 50, 75, 100]
   },
   {
     id: 2,
-    title: "PNY GeForce RTX™ 4090 24GB VERTO™ Triple Fan",
+    title: "PNY GeForce RTX 4090 24GB",
     price: 1000,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1591488320449-011701bb6704?auto=format&fit=crop&q=80&w=800",
+    img: "/pny-4090.png",
     bidIncrements: [25, 50, 75, 100]
   },
   {
     id: 3,
-    title: "ASUS ROG Ally X (2024) Handheld",
+    title: "ASUS ROG Ally X (2024)",
     price: 400,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1612036782180-6f0b6cd846fe?auto=format&fit=crop&q=80&w=800",
+    img: "/rog-ally.png",
     bidIncrements: [10, 25, 50, 75]
   },
   {
     id: 4,
-    title: "CORSAIR VENGEANCE RGB DDR5 64GB (6000MHz)",
+    title: "Corsair 64GB Vengeance RGB DDR5 Memory",
     price: 300,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1541029071515-84cc54f84dc5?auto=format&fit=crop&q=80&w=800",
+    img: "/corsair-ram.png",
     bidIncrements: [10, 20, 35, 50]
   },
   {
     id: 5,
-    title: "Limited Edition Hackathon Hoodie",
-    price: 100,
-    bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&q=80&w=800",
-    bidIncrements: [5, 10, 20, 50]
-  },
-  {
-    id: 6,
-    title: "Mystery Tech Box (Value $500+)",
+    title: "iFixit Repair Business Toolkit",
     price: 150,
     bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&q=80&w=800",
-    bidIncrements: [5, 15, 25, 50]
-  },
-  {
-    id: 7,
-    title: "The Ultimate iFixit Repair Business Toolkit",
-    price: 150,
-    bidder: "No bids yet",
-    img: "https://images.unsplash.com/photo-1581092918056-0c4c3acd3789?auto=format&fit=crop&q=80&w=800",
+    img: "/ifixit-toolkit.png",
     bidIncrements: [10, 20, 35, 50]
   }
 ];
 
 /* --- COMPONENTS --- */
+
+// Theme Switcher Button
+const ThemeSwitcher = () => {
+  const [isDarkMode, toggleDarkMode] = useDarkMode();
+
+  return (
+    <motion.button
+      onClick={toggleDarkMode}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      className="p-2 rounded-full bg-white/30 dark:bg-slate-800/50 border border-white/40 dark:border-slate-700 hover:bg-white/50 dark:hover:bg-slate-700/70 transition-all shadow-sm backdrop-blur-sm"
+      aria-label="Toggle dark mode"
+    >
+      <AnimatePresence mode="wait">
+        {isDarkMode ? (
+          <motion.div
+            key="sun"
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: 180 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Sun size={20} className="text-orange-500" />
+          </motion.div>
+        ) : (
+          <motion.div
+            key="moon"
+            initial={{ scale: 0, rotate: 180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            exit={{ scale: 0, rotate: -180 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Moon size={20} className="text-slate-700" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.button>
+  );
+};
 
 // The floating background orbs
 const FloatingOrb = ({ color, size, top, left, delay }) => (
@@ -148,31 +218,35 @@ const Navbar = () => {
     <motion.nav 
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center backdrop-blur-md bg-white/30 border-b border-white/40 shadow-sm"
+      className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex justify-between items-center backdrop-blur-md bg-white/30 dark:bg-slate-900/30 border-b border-white/40 dark:border-slate-700/40 shadow-sm"
     >
-      <div className="text-2xl font-bold text-slate-800 tracking-tight flex items-center gap-3">
+      <div className="text-2xl font-bold text-slate-800 dark:text-slate-100 tracking-tight flex items-center gap-3">
         {/* LOGO REPLACEMENT HERE */}
         <img src="/sunsetlogo.png" alt="IslandHacks Logo" className="w-10 h-10 object-contain" />
-        <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600">IslandHacks</span>
+        <span className="bg-clip-text text-transparent bg-gradient-to-r from-slate-800 to-slate-600 dark:from-slate-100 dark:to-slate-300">IslandHacks</span>
       </div>
       
-      <div className="hidden md:flex gap-8 text-slate-700 font-medium items-center">
-        <a href="#auction" className="hover:text-orange-500 hover:scale-105 transition-all">Auction</a>
-        <a href="#impact" className="hover:text-orange-500 hover:scale-105 transition-all">Our Impact</a>
-        <a href="#donate" className="px-5 py-2 bg-orange-500 hover:bg-orange-600 rounded-full text-white transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 font-semibold">
+      <div className="hidden md:flex gap-6 text-slate-700 dark:text-slate-300 font-medium items-center">
+        <a href="#auction" className="hover:text-orange-500 dark:hover:text-orange-400 hover:scale-105 transition-all">Auction</a>
+        <a href="#impact" className="hover:text-orange-500 dark:hover:text-orange-400 hover:scale-105 transition-all">Our Impact</a>
+        <ThemeSwitcher />
+        <a href="#donate" className="px-5 py-2 bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 rounded-full text-white transition-all shadow-sm hover:shadow-md hover:-translate-y-0.5 font-semibold">
           Donate
         </a>
       </div>
 
-      <button className="md:hidden text-slate-800" onClick={() => setIsOpen(!isOpen)}>
-        {isOpen ? <X /> : <Menu />}
-      </button>
+      <div className="md:hidden flex items-center gap-3">
+        <ThemeSwitcher />
+        <button className="text-slate-800 dark:text-slate-200" onClick={() => setIsOpen(!isOpen)}>
+          {isOpen ? <X /> : <Menu />}
+        </button>
+      </div>
 
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 bg-white/95 backdrop-blur-xl border-b border-gray-100 p-6 flex flex-col gap-4 md:hidden animate-in slide-in-from-top-5 shadow-xl">
-           <a href="#auction" className="text-slate-800 text-lg" onClick={() => setIsOpen(false)}>Auction</a>
-           <a href="#impact" className="text-slate-800 text-lg" onClick={() => setIsOpen(false)}>Our Impact</a>
-           <a href="#donate" className="text-center py-3 bg-orange-500 rounded-xl text-white font-bold" onClick={() => setIsOpen(false)}>Donate</a>
+        <div className="absolute top-full left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-gray-100 dark:border-slate-700 p-6 flex flex-col gap-4 md:hidden animate-in slide-in-from-top-5 shadow-xl">
+           <a href="#auction" className="text-slate-800 dark:text-slate-200 text-lg" onClick={() => setIsOpen(false)}>Auction</a>
+           <a href="#impact" className="text-slate-800 dark:text-slate-200 text-lg" onClick={() => setIsOpen(false)}>Our Impact</a>
+           <a href="#donate" className="text-center py-3 bg-orange-500 hover:bg-orange-600 rounded-xl text-white font-bold" onClick={() => setIsOpen(false)}>Donate</a>
         </div>
       )}
     </motion.nav>
@@ -263,12 +337,12 @@ const CompactCountdown = () => {
   const time = formatTime(timeLeft);
 
   return (
-    <div className="flex items-center gap-3 text-4xl md:text-5xl font-black text-slate-800 bg-white/70 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/60 shadow-md">
-      {time.days > 0 && <><span className="tabular-nums">{time.days}d</span><span className="text-slate-300 mx-1">:</span></>}
+    <div className="flex items-center gap-3 text-4xl md:text-5xl font-black text-slate-800 dark:text-slate-100 bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm px-6 py-4 rounded-2xl border border-white/60 dark:border-slate-700/60 shadow-md">
+      {time.days > 0 && <><span className="tabular-nums">{time.days}d</span><span className="text-slate-300 dark:text-slate-500 mx-1">:</span></>}
       <span className="tabular-nums">{time.hours}h</span>
-      <span className="text-slate-300 mx-1">:</span>
+      <span className="text-slate-300 dark:text-slate-500 mx-1">:</span>
       <span className="tabular-nums">{time.mins}m</span>
-      <span className="text-slate-300 mx-1">:</span>
+      <span className="text-slate-300 dark:text-slate-500 mx-1">:</span>
       <span className="tabular-nums">{time.secs}s</span>
     </div>
   );
@@ -292,38 +366,38 @@ const BidHistoryModal = ({ isOpen, onClose, bids, itemTitle }) => {
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="relative bg-white rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col max-h-[80vh]"
+        className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-sm overflow-hidden flex flex-col max-h-[80vh]"
       >
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50 shrink-0">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 shrink-0">
           <div>
-            <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2">
-              <History size={18} className="text-orange-500"/> Bid History
+            <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100 flex items-center gap-2">
+              <History size={18} className="text-orange-500 dark:text-orange-400"/> Bid History
             </h3>
-            <p className="text-xs text-slate-500 truncate max-w-[200px]">{itemTitle}</p>
+            <p className="text-xs text-slate-500 dark:text-slate-400 truncate max-w-[200px]">{itemTitle}</p>
           </div>
-          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
             <X size={20} />
           </button>
         </div>
 
         <div className="p-0 overflow-y-auto">
           {bids.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-slate-400 text-center px-6">
+            <div className="flex flex-col items-center justify-center py-12 text-slate-400 dark:text-slate-500 text-center px-6">
               <History size={48} className="mb-4 opacity-20" />
-              <p className="font-medium text-slate-600">No bids yet</p>
+              <p className="font-medium text-slate-600 dark:text-slate-300">No bids yet</p>
               <p className="text-sm">Be the first to place a bid on this item!</p>
             </div>
           ) : (
-            <ul className="divide-y divide-slate-50">
+            <ul className="divide-y divide-slate-50 dark:divide-slate-700">
                {bids.map((bid, i) => (
-                  <li key={i} className="flex justify-between items-center p-4 hover:bg-slate-50 transition-colors">
+                  <li key={i} className="flex justify-between items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
                      <div className="flex flex-col">
-                       <span className="font-bold text-slate-700 text-sm">{bid.name}</span>
-                       <span className="text-xs text-slate-400 flex items-center gap-1">
+                       <span className="font-bold text-slate-700 dark:text-slate-200 text-sm">{bid.name}</span>
+                       <span className="text-xs text-slate-400 dark:text-slate-500 flex items-center gap-1">
                          <Clock size={10} /> {bid.time}
                        </span>
                      </div>
-                     <span className="text-orange-500 font-bold bg-orange-500/10 px-3 py-1 rounded-full text-sm border border-orange-100">
+                     <span className="text-orange-500 dark:text-orange-400 font-bold bg-orange-500/10 dark:bg-orange-500/20 px-3 py-1 rounded-full text-sm border border-orange-100 dark:border-orange-900">
                        ${bid.amount}
                      </span>
                   </li>
@@ -332,8 +406,8 @@ const BidHistoryModal = ({ isOpen, onClose, bids, itemTitle }) => {
           )}
         </div>
         
-        <div className="p-4 border-t border-slate-100 bg-slate-50/50 shrink-0 text-center">
-           <p className="text-xs text-slate-400">All times are local.</p>
+        <div className="p-4 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-900/50 shrink-0 text-center">
+           <p className="text-xs text-slate-400 dark:text-slate-500">All times are local.</p>
         </div>
       </motion.div>
     </div>
@@ -476,12 +550,12 @@ const PaymentModal = ({ isOpen, onClose, amount, itemTitle, onConfirm }) => {
         initial={{ scale: 0.95, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.95, opacity: 0 }}
-        className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"
+        className="relative bg-white dark:bg-slate-800 rounded-3xl shadow-2xl w-full max-w-md overflow-hidden"
       >
         {/* Modal Header */}
-        <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h3 className="font-bold text-lg text-slate-800">Secure Checkout</h3>
-          <button onClick={onClose} className="p-1 hover:bg-slate-100 rounded-full text-slate-400 hover:text-slate-600 transition-colors">
+        <div className="px-6 py-4 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50">
+          <h3 className="font-bold text-lg text-slate-800 dark:text-slate-100">Secure Checkout</h3>
+          <button onClick={onClose} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors">
             <X size={20} />
           </button>
         </div>
@@ -489,41 +563,41 @@ const PaymentModal = ({ isOpen, onClose, amount, itemTitle, onConfirm }) => {
         <div className="p-6">
           {step === 'details' && (
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="bg-orange-500/10 rounded-xl p-4 flex justify-between items-center mb-6 border border-orange-100">
+              <div className="bg-orange-500/10 dark:bg-orange-500/20 rounded-xl p-4 flex justify-between items-center mb-6 border border-orange-100 dark:border-orange-900">
                 <div>
-                  <p className="text-xs text-orange-500 font-bold uppercase tracking-wider">Total Bid Amount</p>
-                  <p className="text-2xl font-bold text-slate-800">${amount}.00</p>
+                  <p className="text-xs text-orange-500 dark:text-orange-400 font-bold uppercase tracking-wider">Total Bid Amount</p>
+                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100">${amount}.00</p>
                 </div>
-                <div className="bg-white p-2 rounded-lg shadow-sm">
-                   <Lock size={20} className="text-orange-500" />
+                <div className="bg-white dark:bg-slate-700 p-2 rounded-lg shadow-sm">
+                   <Lock size={20} className="text-orange-500 dark:text-orange-400" />
                 </div>
               </div>
 
               <div className="space-y-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Full Name</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Full Name</label>
                   <input 
                     required 
                     type="text" 
                     placeholder="Jane Doe"
-                    className="w-full p-3 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-all"
+                    className="w-full p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 focus:border-orange-400 dark:focus:border-orange-600 transition-all"
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Email Address</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Email Address</label>
                   <div className="relative">
                     <input 
                       required 
                       type="email" 
                       placeholder="jane@example.com"
-                      className={`w-full p-3 rounded-xl border bg-slate-50 focus:outline-none focus:ring-2 transition-all ${
+                      className={`w-full p-3 rounded-xl border bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 transition-all ${
                         emailError && emailTouched
-                          ? 'border-red-400 focus:ring-red-200 focus:border-red-400'
+                          ? 'border-red-400 dark:border-red-600 focus:ring-red-200 dark:focus:ring-red-900 focus:border-red-400 dark:focus:border-red-600'
                           : formData.email && !emailError
-                          ? 'border-green-400 focus:ring-green-200 focus:border-green-400'
-                          : 'border-slate-200 focus:ring-orange-200 focus:border-orange-400'
+                          ? 'border-green-400 dark:border-green-600 focus:ring-green-200 dark:focus:ring-green-900 focus:border-green-400 dark:focus:border-green-600'
+                          : 'border-slate-200 dark:border-slate-700 focus:ring-orange-200 dark:focus:ring-orange-900 focus:border-orange-400 dark:focus:border-orange-600'
                       }`}
                       value={formData.email}
                       onChange={handleEmailChange}
@@ -543,15 +617,15 @@ const PaymentModal = ({ isOpen, onClose, amount, itemTitle, onConfirm }) => {
                   )}
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">Card Details</label>
+                  <label className="block text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase mb-1">Card Details</label>
                   <div className="relative">
-                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+                    <CreditCard className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" size={18} />
                     <input 
                       required 
                       type="text" 
                       placeholder="0000 0000 0000 0000"
                       maxLength="19"
-                      className="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-orange-200 focus:border-orange-400 transition-all font-mono text-sm"
+                      className="w-full pl-10 pr-3 py-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-orange-200 dark:focus:ring-orange-900 focus:border-orange-400 dark:focus:border-orange-600 transition-all font-mono text-sm"
                       value={formData.card}
                       onChange={handleCardChange}
                     />
@@ -559,11 +633,11 @@ const PaymentModal = ({ isOpen, onClose, amount, itemTitle, onConfirm }) => {
                 </div>
               </div>
 
-              <button type="submit" className="w-full mt-6 py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 transition-all shadow-lg flex justify-center items-center gap-2">
+              <button type="submit" className="w-full mt-6 py-4 bg-slate-900 dark:bg-slate-700 text-white rounded-xl font-bold hover:bg-slate-800 dark:hover:bg-slate-600 transition-all shadow-lg flex justify-center items-center gap-2">
                 Confirm Payment <ArrowRight size={18} />
               </button>
               
-              <div className="flex justify-center items-center gap-2 text-xs text-slate-400 mt-4">
+              <div className="flex justify-center items-center gap-2 text-xs text-slate-400 dark:text-slate-500 mt-4">
                 <Lock size={12} /> SSL Secured Transaction
               </div>
             </form>
@@ -578,8 +652,8 @@ const PaymentModal = ({ isOpen, onClose, amount, itemTitle, onConfirm }) => {
               >
                 <Loader2 size={48} />
               </motion.div>
-              <h4 className="text-xl font-bold text-slate-800 mb-2">Processing Payment...</h4>
-              <p className="text-slate-500">Securely authorizing your bid for <br/> <span className="font-semibold text-slate-700">{itemTitle}</span></p>
+              <h4 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-2">Processing Payment...</h4>
+              <p className="text-slate-500 dark:text-slate-400">Securely authorizing your bid for <br/> <span className="font-semibold text-slate-700 dark:text-slate-200">{itemTitle}</span></p>
             </div>
           )}
 
@@ -589,13 +663,13 @@ const PaymentModal = ({ isOpen, onClose, amount, itemTitle, onConfirm }) => {
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
                 type="spring"
-                className="w-20 h-20 bg-green-100 text-green-500 rounded-full flex items-center justify-center mb-6"
+                className="w-20 h-20 bg-green-100 dark:bg-green-900/30 text-green-500 dark:text-green-400 rounded-full flex items-center justify-center mb-6"
               >
                 <CheckCircle size={40} />
               </motion.div>
-              <h4 className="text-2xl font-bold text-slate-800 mb-2">Bid Placed!</h4>
-              <p className="text-slate-500 mb-2">You are now the highest bidder.</p>
-              <div className="text-xs bg-slate-100 px-3 py-1 rounded text-slate-400 font-mono">
+              <h4 className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-2">Bid Placed!</h4>
+              <p className="text-slate-500 dark:text-slate-400 mb-2">You are now the highest bidder.</p>
+              <div className="text-xs bg-slate-100 dark:bg-slate-700 px-3 py-1 rounded text-slate-400 dark:text-slate-400 font-mono">
                 Receipt: {receiptId}
               </div>
             </div>
@@ -614,7 +688,7 @@ const GlassCard = ({ children, className = "", delay = 0, tilt = false }) => (
     whileHover={tilt ? { rotate: 1 } : {}}
     viewport={{ once: true, margin: "-50px" }}
     transition={{ duration: 0.6, delay: delay, type: "spring", stiffness: 50 }}
-    className={`bg-white/40 backdrop-blur-xl border border-white/60 rounded-2xl p-6 shadow-xl shadow-orange-900/5 hover:bg-white/50 hover:border-white/80 transition-all duration-300 ${className}`}
+    className={`bg-white/40 dark:bg-slate-800/40 backdrop-blur-xl border border-white/60 dark:border-slate-700/60 rounded-2xl p-6 shadow-xl shadow-orange-900/5 dark:shadow-slate-900/20 hover:bg-white/50 dark:hover:bg-slate-800/50 hover:border-white/80 dark:hover:border-slate-700/80 transition-all duration-300 ${className}`}
   >
     {children}
   </motion.div>
@@ -716,16 +790,16 @@ const AuctionItem = ({ title, price, img, bidder, bidIncrements = [5, 10, 20, 50
       <GlassCard className="flex flex-col gap-4 group relative overflow-hidden">
         {/* Quick Bid Overlay */}
         {isBidding && (
-          <div className="absolute inset-0 bg-white/95 backdrop-blur-xl z-20 flex flex-col justify-center items-center p-6 text-slate-800 animate-in fade-in zoom-in-95 duration-200">
-              <h4 className="font-bold text-xl mb-1 text-slate-800">Select Bid Amount</h4>
-              <p className="text-slate-500 text-sm mb-6">Current: <span className="font-bold text-orange-500">${currentPrice}</span></p>
+          <div className="absolute inset-0 bg-white/95 dark:bg-slate-800/95 backdrop-blur-xl z-20 flex flex-col justify-center items-center p-6 text-slate-800 dark:text-slate-100 animate-in fade-in zoom-in-95 duration-200">
+              <h4 className="font-bold text-xl mb-1 text-slate-800 dark:text-slate-100">Select Bid Amount</h4>
+              <p className="text-slate-500 dark:text-slate-400 text-sm mb-6">Current: <span className="font-bold text-orange-500 dark:text-orange-400">${currentPrice}</span></p>
               
               <div className="grid grid-cols-2 gap-3 w-full mb-4">
                   {bidIncrements.map(inc => (
                       <button 
                         key={inc} 
                         onClick={() => initiateBid(inc)} 
-                        className="py-3 bg-orange-500/10 hover:bg-orange-500/20 border border-orange-200 text-orange-500 rounded-xl font-bold transition-colors"
+                        className="py-3 bg-orange-500/10 dark:bg-orange-500/20 hover:bg-orange-500/20 dark:hover:bg-orange-500/30 border border-orange-200 dark:border-orange-700 text-orange-500 dark:text-orange-400 rounded-xl font-bold transition-colors"
                       >
                           +${inc}
                       </button>
@@ -753,19 +827,19 @@ const AuctionItem = ({ title, price, img, bidder, bidIncrements = [5, 10, 20, 50
                    </button>
               </form>
 
-              <button onClick={() => setIsBidding(false)} className="text-sm text-slate-500 hover:text-slate-800 font-medium py-2 hover:underline">
+              <button onClick={() => setIsBidding(false)} className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 font-medium py-2 hover:underline">
                   Cancel
               </button>
           </div>
         )}
 
-        <div className="h-56 w-full bg-orange-500/20 rounded-2xl overflow-hidden relative shadow-sm">
+        <div className="h-56 w-full bg-white dark:bg-slate-800 rounded-2xl overflow-hidden relative shadow-sm p-4">
             <img 
               src={img} 
               alt={title} 
-              className="w-full h-full object-cover opacity-95 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+              className="w-full h-full object-contain opacity-95 group-hover:opacity-100 transition-all duration-500"
             />
-            <div className="absolute top-3 right-3 bg-white/80 backdrop-blur-md text-orange-500 text-xs font-bold px-3 py-1.5 rounded-full border border-white/40 flex items-center gap-1 shadow-sm min-w-[100px] justify-center z-10">
+            <div className="absolute top-3 right-3 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md text-orange-500 dark:text-orange-400 text-xs font-bold px-3 py-1.5 rounded-full border border-white/40 dark:border-slate-700/40 flex items-center gap-1 shadow-sm min-w-[100px] justify-center z-10">
               {timeLeft > 0 ? (
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
               ) : (
@@ -775,17 +849,17 @@ const AuctionItem = ({ title, price, img, bidder, bidIncrements = [5, 10, 20, 50
             </div>
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-bold text-slate-800 leading-tight min-h-[56px] line-clamp-2">{title}</h3>
-          <div className="flex justify-between items-end p-3 bg-white/40 rounded-xl border border-white/40">
+          <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 leading-tight min-h-[56px] line-clamp-2">{title}</h3>
+          <div className="flex justify-between items-end p-3 bg-white/40 dark:bg-slate-800/40 rounded-xl border border-white/40 dark:border-slate-700/40">
             <div className="flex flex-col">
-              <span className="text-slate-500 text-xs uppercase tracking-wider">Top Bidder</span>
-              <span className={`text-sm font-medium flex items-center gap-1 ${currentBidder === 'You' || currentBidder.length > 15 ? 'text-orange-500 font-bold' : 'text-slate-700'}`}>
+              <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">Top Bidder</span>
+              <span className={`text-sm font-medium flex items-center gap-1 ${currentBidder === 'You' || currentBidder.length > 15 ? 'text-orange-500 dark:text-orange-400 font-bold' : 'text-slate-700 dark:text-slate-300'}`}>
                  {currentBidder}
               </span>
             </div>
             <div className="text-right">
-              <span className="text-slate-500 text-xs uppercase tracking-wider">Current</span>
-              <div className="text-2xl font-bold text-orange-500 drop-shadow-sm">${currentPrice}</div>
+              <span className="text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider">Current</span>
+              <div className="text-2xl font-bold text-orange-500 dark:text-orange-400 drop-shadow-sm">${currentPrice}</div>
             </div>
           </div>
           
@@ -793,12 +867,12 @@ const AuctionItem = ({ title, price, img, bidder, bidIncrements = [5, 10, 20, 50
           <div className="flex items-center gap-2 text-sm px-1 pt-1">
               <button 
                 onClick={() => setShowHistory(true)}
-                className="text-slate-500 hover:text-orange-500 underline decoration-slate-300 hover:decoration-orange-500 underline-offset-4 transition-all font-medium"
+                className="text-slate-500 dark:text-slate-400 hover:text-orange-500 dark:hover:text-orange-400 underline decoration-slate-300 dark:decoration-slate-600 hover:decoration-orange-500 dark:hover:decoration-orange-400 underline-offset-4 transition-all font-medium"
               >
                 Bid History
               </button>
-              <span className="text-slate-300 text-xs">•</span>
-              <span className="text-slate-400 text-xs">{bids.length} bids</span>
+              <span className="text-slate-300 dark:text-slate-600 text-xs">•</span>
+              <span className="text-slate-400 dark:text-slate-500 text-xs">{bids.length} bids</span>
            </div>
 
         </div>
@@ -807,10 +881,10 @@ const AuctionItem = ({ title, price, img, bidder, bidIncrements = [5, 10, 20, 50
           disabled={!auctionStarted || timeLeft <= 0}
           className={`w-full py-3.5 mt-auto rounded-xl text-white font-bold shadow-lg transition-all flex items-center justify-center gap-2 ${
             !auctionStarted 
-              ? 'bg-slate-400 cursor-not-allowed' 
+              ? 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed' 
               : timeLeft > 0 
-                ? 'bg-sky-500 hover:bg-sky-500/90 shadow-sky-400/20 active:scale-95' 
-                : 'bg-slate-400 cursor-not-allowed'
+                ? 'bg-sky-500 dark:bg-sky-600 hover:bg-sky-500/90 dark:hover:bg-sky-500 shadow-sky-400/20 dark:shadow-sky-900/20 active:scale-95' 
+                : 'bg-slate-400 dark:bg-slate-600 cursor-not-allowed'
           }`}
         >
           {!auctionStarted ? (
@@ -843,18 +917,18 @@ export default function App() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white overflow-x-hidden font-sans selection:bg-orange-200 selection:text-orange-900 text-slate-800 relative">
+    <div className="min-h-screen bg-white dark:bg-slate-900 overflow-x-hidden font-sans selection:bg-orange-200 dark:selection:bg-orange-900 selection:text-orange-900 dark:selection:text-orange-100 text-slate-800 dark:text-slate-100 relative transition-colors duration-200">
       
       {/* --- AMBIENT BACKGROUND LAYERS --- */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute inset-0 bg-white"></div>
+        <div className="absolute inset-0 bg-white dark:bg-slate-900"></div>
         <div className="absolute inset-0 w-full h-full">
-          <FloatingOrb color="bg-orange-100/50" size="50vw" top="-15%" left="-10%" delay={0} />
-          <FloatingOrb color="bg-sky-100/50" size="45vw" top="40%" left="60%" delay={2} />
-          <FloatingOrb color="bg-orange-50/30" size="40vw" top="80%" left="-10%" delay={4} />
-          <FloatingOrb color="bg-sky-50/30" size="35vw" top="10%" left="70%" delay={1} />
+          <FloatingOrb color="bg-orange-100/50 dark:bg-orange-900/20" size="50vw" top="-15%" left="-10%" delay={0} />
+          <FloatingOrb color="bg-sky-100/50 dark:bg-sky-900/20" size="45vw" top="40%" left="60%" delay={2} />
+          <FloatingOrb color="bg-orange-50/30 dark:bg-orange-900/10" size="40vw" top="80%" left="-10%" delay={4} />
+          <FloatingOrb color="bg-sky-50/30 dark:bg-sky-900/10" size="35vw" top="10%" left="70%" delay={1} />
         </div>
-        <div className="absolute inset-0 opacity-[0.3] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
+        <div className="absolute inset-0 opacity-[0.3] dark:opacity-[0.15] bg-[url('https://grainy-gradients.vercel.app/noise.svg')] mix-blend-overlay"></div>
       </div>
 
       <Navbar />
@@ -862,35 +936,49 @@ export default function App() {
       {/* --- HERO SECTION (Compact) --- */}
       <section className="relative pt-24 pb-8 px-6">
         <div className="max-w-5xl mx-auto text-center z-10">
-          {/* Live badge + Title on same visual line */}
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
-            className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full bg-white/40 border border-white/60 backdrop-blur-xl text-xs font-medium tracking-wide text-slate-600 shadow-sm"
-          >
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-            </span>
-            Live Auction Now Open
-          </motion.div>
+          {/* Dynamic auction status badge */}
+          {!hasAuctionEnded() && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full bg-white/40 dark:bg-slate-800/40 border border-white/60 dark:border-slate-700/60 backdrop-blur-xl text-xs font-medium tracking-wide text-slate-600 dark:text-slate-300 shadow-sm"
+            >
+              {hasAuctionStarted() ? (
+                <>
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
+                  </span>
+                  Live Auction Now Open
+                </>
+              ) : (
+                <>
+                  <span className="relative flex h-2.5 w-2.5">
+                    <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-50"></span>
+                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500 opacity-65"></span>
+                  </span>
+                  Auction Opens Soon
+                </>
+              )}
+            </motion.div>
+          )}
           
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1, duration: 0.6 }}
-            className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-3 tracking-tighter text-slate-800 font-display"
+            className="text-5xl md:text-6xl lg:text-7xl font-extrabold mb-3 tracking-tighter text-slate-800 dark:text-slate-100 font-display"
           >
-            <span className="text-slate-800">IslandHacks </span>
-            <span className="text-orange-500">Auction</span>
+            <span className="text-slate-800 dark:text-slate-100">IslandHacks </span>
+            <span className="text-orange-500 dark:text-orange-400">Auction</span>
           </motion.h1>
 
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.2 }}
-            className="text-base md:text-lg text-slate-600 mb-4 max-w-xl mx-auto relative"
+            className="text-base md:text-lg text-slate-600 dark:text-slate-300 mb-4 max-w-xl mx-auto relative"
           >
             <p className="relative inline-block">
               <span className="relative inline-block">
@@ -963,7 +1051,7 @@ export default function App() {
               <Clock size={14} /> {hasAuctionStarted() ? 'Auction Ends In' : 'Auction Starts In'}
             </span>
             <CompactCountdown />
-            <span className="text-sm text-slate-600 font-medium">
+            <span className="text-sm text-slate-600 dark:text-slate-300 font-medium">
               {formatAuctionDate(hasAuctionStarted() ? AUCTION_END_DATE : AUCTION_START_DATE)}
             </span>
           </motion.div>
@@ -974,7 +1062,7 @@ export default function App() {
       <section id="auction" className="pt-4 pb-16 px-6 relative z-10">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
-            <h2 className="text-2xl md:text-3xl font-bold text-slate-800 font-display flex items-center gap-2">
+            <h2 className="text-2xl md:text-3xl font-bold text-slate-800 dark:text-slate-100 font-display flex items-center gap-2">
               Auction Items <span className="text-xl"></span>
             </h2>
             <motion.div 
@@ -989,8 +1077,8 @@ export default function App() {
           
           {/* Auction date info */}
           <div className="mb-6 text-center">
-            <p className="text-sm text-slate-600 font-medium flex items-center justify-center gap-2">
-              <Calendar size={16} className="text-orange-500" />
+            <p className="text-sm text-slate-600 dark:text-slate-300 font-medium flex items-center justify-center gap-2">
+              <Calendar size={16} className="text-orange-500 dark:text-orange-400" />
               {hasAuctionStarted() ? (
                 <>All items close: {formatAuctionDate(AUCTION_END_DATE)}</>
               ) : (
@@ -1027,34 +1115,34 @@ export default function App() {
                   whileInView={{ opacity: 1, x: 0 }}
                   viewport={{ once: true }}
                 >
-                  <div className="flex items-center gap-2 text-pink-500 font-bold mb-4 uppercase tracking-widest text-sm">
+                  <div className="flex items-center gap-2 text-pink-500 dark:text-pink-400 font-bold mb-4 uppercase tracking-widest text-sm">
                     <Heart size={16} fill="currentColor" /> Our Impact
                   </div>
-                  <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-slate-800 font-display">
+                  <h2 className="text-4xl md:text-5xl font-bold mb-6 leading-tight text-slate-800 dark:text-slate-100 font-display">
                     Where Your <br/> Bid Goes 💸
                   </h2>
-                  <p className="text-2xl font-bold text-slate-800 mb-4">
+                  <p className="text-2xl font-bold text-slate-800 dark:text-slate-100 mb-4">
                     Students. Students. Students.
                   </p>
-                  <p className="text-lg text-slate-600 mb-8 leading-relaxed">
-                    Last year, we hosted <span className="font-semibold text-slate-700">120+ students</span> and awarded a <span className="font-semibold text-orange-500">$3,000 PC scholarship</span>. This year, we're awarding <span className="font-semibold text-sky-600">$4,000+ in laptop scholarships</span> to three seniors. Your bids help fund our annual hackathon and scholarships for students in Alameda. Help us support more students!
+                  <p className="text-lg text-slate-600 dark:text-slate-300 mb-8 leading-relaxed">
+                    Last year, we hosted <span className="font-semibold text-slate-700 dark:text-slate-200">120+ students</span> and awarded a <span className="font-semibold text-orange-500 dark:text-orange-400">$3,000 PC scholarship</span>. This year, we're awarding <span className="font-semibold text-sky-600 dark:text-sky-400">$4,000+ in laptop scholarships</span> to three seniors. Your bids help fund our annual hackathon and scholarships for students in Alameda. Help us support more students!
                   </p>
                   
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                    <div className="p-4 rounded-xl bg-white/50 border border-white/60 backdrop-blur-md shadow-sm">
-                      <Laptop className="mb-2 text-sky-500" size={28} />
-                      <div className="text-2xl font-bold text-slate-800 font-display">$7k+</div>
-                      <div className="text-xs text-slate-500">In Laptop Scholarships</div>
+                    <div className="p-4 rounded-xl bg-white/50 dark:bg-slate-800/50 border border-white/60 dark:border-slate-700/60 backdrop-blur-md shadow-sm">
+                      <Laptop className="mb-2 text-sky-500 dark:text-sky-400" size={28} />
+                      <div className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-display">$7k+</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">In Laptop Scholarships</div>
                     </div>
-                    <div className="p-4 rounded-3xl bg-white/50 border border-white/60 backdrop-blur-md shadow-sm">
-                      <Users className="mb-2 text-sky-500" size={28} />
-                      <div className="text-2xl font-bold text-slate-800 font-display">300+</div>
-                      <div className="text-xs text-slate-500">Student Attendees</div>
+                    <div className="p-4 rounded-3xl bg-white/50 dark:bg-slate-800/50 border border-white/60 dark:border-slate-700/60 backdrop-blur-md shadow-sm">
+                      <Users className="mb-2 text-sky-500 dark:text-sky-400" size={28} />
+                      <div className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-display">300+</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Student Attendees</div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-white/50 border border-white/60 backdrop-blur-md shadow-sm col-span-2 md:col-span-1">
-                      <Calendar className="mb-2 text-sky-500" size={28} />
-                      <div className="text-2xl font-bold text-slate-800 font-display">3</div>
-                      <div className="text-xs text-slate-500">Hackathons Hosted</div>
+                    <div className="p-4 rounded-2xl bg-white/50 dark:bg-slate-800/50 border border-white/60 dark:border-slate-700/60 backdrop-blur-md shadow-sm col-span-2 md:col-span-1">
+                      <Calendar className="mb-2 text-sky-500 dark:text-sky-400" size={28} />
+                      <div className="text-2xl font-bold text-slate-800 dark:text-slate-100 font-display">3</div>
+                      <div className="text-xs text-slate-500 dark:text-slate-400">Hackathons Hosted</div>
                     </div>
                   </div>
                 </motion.div>
@@ -1070,14 +1158,14 @@ export default function App() {
                 >
                    <img 
                     src="/heart-hands.JPG" 
-                    className="rounded-xl object-cover h-56 w-full border-4 border-white shadow-xl"
+                    className="rounded-xl object-cover h-56 w-full border-4 border-white dark:border-slate-700 shadow-xl"
                     style={{ objectPosition: '25% top' }}
                     alt="Students making heart with hands"
                   />
                   <motion.div 
                     initial={{ rotate: 2 }}
                     whileHover={{ rotate: 0 }}
-                    className="p-4 bg-yellow-50 rounded-xl border-2 border-dashed border-orange-300 text-sm text-slate-800 shadow-sm"
+                    className="p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-xl border-2 border-dashed border-orange-300 dark:border-orange-700 text-sm text-slate-800 dark:text-slate-200 shadow-sm"
                   >
                     <span className="font-bold">"Best weekend of my life!"</span>
                     <br/>— actual attendee feedback 💛
@@ -1092,7 +1180,7 @@ export default function App() {
                   >
                     <img 
                       src="/mentoring.jpg" 
-                      className="rounded-3xl object-cover h-48 w-full border-4 border-white shadow-xl"
+                      className="rounded-3xl object-cover h-48 w-full border-4 border-white dark:border-slate-700 shadow-xl"
                       alt="Mentor helping students code"
                     />
                   </motion.div>
@@ -1103,7 +1191,7 @@ export default function App() {
                   >
                     <img 
                       src="/hacking-room.jpg" 
-                      className="rounded-xl object-cover object-left h-40 w-full border-4 border-white shadow-xl"
+                      className="rounded-xl object-cover object-left h-40 w-full border-4 border-white dark:border-slate-700 shadow-xl"
                       alt="Room full of students hacking"
                     />
                   </motion.div>
@@ -1118,10 +1206,10 @@ export default function App() {
                 >
                   <img 
                     src="/group-photo.jpg" 
-                    className="rounded-2xl object-cover h-48 w-full border-4 border-white shadow-xl"
+                    className="rounded-2xl object-cover h-48 w-full border-4 border-white dark:border-slate-700 shadow-xl"
                     alt="Full IslandHacks group photo"
                   />
-                  <p className="text-center text-sm text-slate-500 mt-2">IslandHacks 2025 @ Penumbra HQ</p>
+                  <p className="text-center text-sm text-slate-500 dark:text-slate-400 mt-2">IslandHacks 2025 @ Penumbra HQ</p>
                 </motion.div>
               </div>
             </div>
@@ -1132,20 +1220,20 @@ export default function App() {
       {/* --- DONATION / FOOTER --- */}
       <section id="donate" className="py-20 px-6 relative z-10 pb-32">
         <div className="max-w-3xl mx-auto text-center">
-          <GlassCard className="border-t-4 border-t-pink-300 bg-white/60">
+          <GlassCard className="border-t-4 border-t-pink-300 dark:border-t-pink-400 bg-white/60 dark:bg-slate-800/60">
             <motion.div 
               initial={{ rotate: -5 }}
               whileHover={{ rotate: 5 }}
-              className="inline-flex p-4 rounded-xl bg-pink-400/20 mb-6 ring-2 ring-pink-200"
+              className="inline-flex p-4 rounded-xl bg-pink-400/20 dark:bg-pink-500/20 mb-6 ring-2 ring-pink-200 dark:ring-pink-700"
             >
-              <Heart size={40} className="text-pink-400 fill-pink-400/30" />
+              <Heart size={40} className="text-pink-400 dark:text-pink-400 fill-pink-400/30 dark:fill-pink-400/30" />
             </motion.div>
             
-            <h2 className="text-4xl font-bold mb-4 text-slate-800 font-display">Just Want to Donate?</h2>
-              <p className="text-slate-600 mb-10 text-lg leading-relaxed">
+            <h2 className="text-4xl font-bold mb-4 text-slate-800 dark:text-slate-100 font-display">Just Want to Donate?</h2>
+              <p className="text-slate-600 dark:text-slate-300 mb-10 text-lg leading-relaxed">
                Support IslandHacks by donating directly!
                <br className="hidden md:block"/> Every dollar goes straight to funding future hackathons & scholarships.
-               <br /><span className="text-sm text-slate-500">We're a 501(c)(3) nonprofit. Your donation is tax-deductible 🙂</span>
+               <br /><span className="text-sm text-slate-500 dark:text-slate-400">We're a 501(c)(3) nonprofit. Your donation is tax-deductible 🙂</span>
              </p>
             
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-10">
@@ -1160,7 +1248,7 @@ export default function App() {
                   href={`https://hcb.hackclub.com/donations/start/islandhacks${item.value ? `?amount=${item.value}` : ''}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="px-6 py-4 rounded-2xl border-2 border-slate-200 bg-white hover:bg-pink-50 hover:border-pink-300 hover:text-pink-500 transition-all font-semibold text-lg text-slate-700 flex items-center justify-center shadow-sm"
+                  className="px-6 py-4 rounded-2xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-pink-50 dark:hover:bg-pink-900/20 hover:border-pink-300 dark:hover:border-pink-700 hover:text-pink-500 dark:hover:text-pink-400 transition-all font-semibold text-lg text-slate-700 dark:text-slate-300 flex items-center justify-center shadow-sm"
                 >
                   {item.label}
                 </a>
@@ -1171,13 +1259,13 @@ export default function App() {
               href="https://hcb.hackclub.com/donations/start/islandhacks" 
               target="_blank" 
               rel="noopener noreferrer"
-              className="w-full sm:w-auto px-16 py-5 bg-gradient-to-r from-orange-500 to-pink-500 hover:from-orange-400 hover:to-pink-400 text-white rounded-2xl font-bold shadow-xl shadow-orange-500/20 transition-all hover:scale-105 flex items-center justify-center gap-3 mx-auto text-lg"
+              className="w-full sm:w-auto px-16 py-5 bg-gradient-to-r from-orange-500 to-pink-500 dark:from-orange-600 dark:to-pink-600 hover:from-orange-400 hover:to-pink-400 dark:hover:from-orange-500 dark:hover:to-pink-500 text-white rounded-2xl font-bold shadow-xl shadow-orange-500/20 dark:shadow-orange-900/30 transition-all hover:scale-105 flex items-center justify-center gap-3 mx-auto text-lg"
             >
               Donate Now <ArrowRight size={22} />
             </a>
           </GlassCard>
           
-          <footer className="mt-20 text-slate-400 text-sm flex flex-col items-center gap-6">
+          <footer className="mt-20 text-slate-400 dark:text-slate-500 text-sm flex flex-col items-center gap-6">
             <div className="flex flex-col sm:flex-row gap-8 items-center">
               <a 
                 href="https://www.instagram.com/islandhacks/" 
