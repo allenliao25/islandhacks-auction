@@ -1,8 +1,5 @@
 @import "tailwindcss";
 
-/* Enable class-based dark mode for Tailwind v4 */
-@custom-variant dark (&:where(.dark, .dark *));
-
 /* Playful heading font */
 .font-display {
   font-family: 'Sora', sans-serif;
