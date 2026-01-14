@@ -936,34 +936,6 @@ export default function App() {
       {/* --- HERO SECTION (Compact) --- */}
       <section className="relative pt-24 pb-8 px-6">
         <div className="max-w-5xl mx-auto text-center z-10">
-          {/* Dynamic auction status badge */}
-          {!hasAuctionEnded() && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 mb-3 px-4 py-1.5 rounded-full bg-white/40 dark:bg-slate-800/40 border border-white/60 dark:border-slate-700/60 backdrop-blur-xl text-xs font-medium tracking-wide text-slate-600 dark:text-slate-300 shadow-sm"
-            >
-              {hasAuctionStarted() ? (
-                <>
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-                  </span>
-                  Live Auction Now Open
-                </>
-              ) : (
-                <>
-                  <span className="relative flex h-2.5 w-2.5">
-                    <span className="animate-ping-slow absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-50"></span>
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-yellow-500 opacity-65"></span>
-                  </span>
-                  Auction Opens Soon
-                </>
-              )}
-            </motion.div>
-          )}
-          
           <motion.h1 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
