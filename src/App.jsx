@@ -998,24 +998,24 @@ export default function App() {
                     Students. Students. Students.
                   </p>
                   <p className="text-lg text-slate-600  mb-8 leading-relaxed">
-                    Last year, we hosted <span className="font-semibold text-slate-700 ">120+ students</span> and awarded a <span className="font-semibold text-orange-500 ">$3,000 PC scholarship</span>. This year, we're awarding <span className="font-semibold text-sky-600 ">$4,000+ in laptop scholarships</span> to three seniors. Your bids help fund our annual hackathon and scholarships for students in Alameda. Help us support more students!
+                    Last year, we hosted <span className="font-semibold text-slate-700 ">120+ students</span> and awarded a <span className="font-semibold text-orange-500 ">$3,000+ PC scholarship</span>. This year, we're awarding <span className="font-semibold text-sky-600 ">$4,000+ in laptop scholarships</span> to three seniors. Your bids help fund our annual hackathon and scholarships for students in Alameda. Help us support more students!
                   </p>
                   
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-8">
-                    <div className="p-4 rounded-xl bg-white/50  border border-white/60  backdrop-blur-md shadow-sm">
-                      <Laptop className="mb-2 text-sky-500 " size={28} />
-                      <div className="text-2xl font-bold text-slate-800  font-display">$7k+</div>
-                      <div className="text-xs text-slate-500 ">In Laptop Scholarships</div>
+                    <div className="p-4 rounded-2xl bg-white/50  border border-white/60  backdrop-blur-md shadow-sm col-span-2 md:col-span-1">
+                      <Calendar className="mb-2 text-sky-500 " size={28} />
+                      <div className="text-2xl font-bold text-slate-800  font-display">3</div>
+                      <div className="text-xs text-slate-500 ">Hackathons Hosted</div>
                     </div>
                     <div className="p-4 rounded-3xl bg-white/50  border border-white/60  backdrop-blur-md shadow-sm">
                       <Users className="mb-2 text-sky-500 " size={28} />
                       <div className="text-2xl font-bold text-slate-800  font-display">300+</div>
                       <div className="text-xs text-slate-500 ">Student Attendees</div>
                     </div>
-                    <div className="p-4 rounded-2xl bg-white/50  border border-white/60  backdrop-blur-md shadow-sm col-span-2 md:col-span-1">
-                      <Calendar className="mb-2 text-sky-500 " size={28} />
-                      <div className="text-2xl font-bold text-slate-800  font-display">3</div>
-                      <div className="text-xs text-slate-500 ">Hackathons Hosted</div>
+                    <div className="p-4 rounded-xl bg-white/50  border border-white/60  backdrop-blur-md shadow-sm">
+                      <Laptop className="mb-2 text-sky-500 " size={28} />
+                      <div className="text-2xl font-bold text-slate-800  font-display">$7k+</div>
+                      <div className="text-xs text-slate-500 ">In Laptop Scholarships</div>
                     </div>
                   </div>
                 </motion.div>
@@ -1045,8 +1045,8 @@ export default function App() {
                   <div 
                     className="p-4 bg-yellow-50  rounded-xl border-2 border-dashed border-orange-300  text-sm text-slate-800  shadow-sm"
                   >
-                    <span className="font-bold">"Best weekend of my life!"</span>
-                    <br/>— actual attendee feedback 💛
+                    <span className="font-bold">"I think coding is fun now!"</span>
+                    <br/>— IslandHacks attendee 💛
                   </div>
                 </motion.div>
                 
